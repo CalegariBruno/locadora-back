@@ -23,6 +23,7 @@ public class Classe {
 
     private Double valor;
 
+    @Column(name = "prazo_devolucao")
     @Temporal(TemporalType.DATE)
     private Date prazoDevolucao;
 
