@@ -4,7 +4,6 @@ import com.example.locadora.domain.Diretor;
 import com.example.locadora.repositories.DiretorRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.http.HttpStatus;
 
@@ -49,7 +48,7 @@ public class DiretorService {
         return diretorRepository.findAll();
     }
 
-    public Diretor listarPorId(Long id) {
+    public Diretor buscarPorId(Long id) {
         return diretorRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Diretor não encontrado"));
     }
