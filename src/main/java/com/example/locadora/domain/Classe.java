@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.time.LocalDate;
 import java.util.Date;
 
 @Entity
@@ -24,7 +25,6 @@ public class Classe {
     private Double valor;
 
     @Column(name = "prazo_devolucao")
-    @Temporal(TemporalType.DATE)
-    private Date prazoDevolucao;
+    private LocalDate prazoDevolucao;
 
 }
