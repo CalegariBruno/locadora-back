@@ -4,12 +4,7 @@ import java.time.LocalDate;
 
 import com.example.locadora.domain.enums.tipoItemEnum;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -20,7 +15,8 @@ import lombok.Setter;
 @Setter
 @Getter
 @Entity
-public class item {
+public class Item {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -31,4 +27,8 @@ public class item {
 
     @Enumerated(EnumType.STRING)
     private tipoItemEnum tipoItem;
+
+    @ManyToOne
+    @JoinColumn(name = "id_titulo", nullable = false)
+    private Titulo titulo;
 }
