@@ -1,5 +1,6 @@
 package com.example.locadora.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -8,6 +9,7 @@ import lombok.Setter;
 
 import java.time.LocalDate;
 import java.util.Date;
+import java.util.Set;
 
 @Entity
 @Getter
@@ -24,7 +26,11 @@ public class Classe {
 
     private Double valor;
 
-    @Column(name = "prazo_devolucao")
+    @JoinColumn(name = "prazo_devolucao")
     private LocalDate prazoDevolucao;
+
+    @JsonIgnore
+    @OneToMany(mappedBy = "classe")
+    private Set<Titulo> titulos;
 
 }

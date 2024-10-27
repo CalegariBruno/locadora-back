@@ -1,13 +1,13 @@
 package com.example.locadora.domain;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+
+import java.util.Set;
 
 @Entity
 @Getter
@@ -21,5 +21,9 @@ public class Diretor {
     private Long id;
 
     private String nome;
+
+    @JsonIgnore
+    @OneToMany(mappedBy = "diretor")
+    private Set<Titulo> titulos;
 
 }
