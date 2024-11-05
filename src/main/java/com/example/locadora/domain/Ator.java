@@ -1,5 +1,6 @@
 package com.example.locadora.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -21,6 +22,7 @@ public class Ator {
 
     private String nome;
 
+    @JsonIgnore
     @ManyToMany(mappedBy = "atores")
     private Set<Titulo> titulos;
 
