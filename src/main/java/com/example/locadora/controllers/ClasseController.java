@@ -45,7 +45,7 @@ public class ClasseController {
     @DeleteMapping("/deletar/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @Operation(description = "Deleta a classe dado o ID.")
-    public void deletar(@PathVariable Long id) {
+    public void deletar(@PathVariable Long id) throws Exception{
         classeService.deletar(id);
     }
 

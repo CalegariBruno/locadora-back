@@ -33,12 +33,18 @@ public class DiretorService {
         }
     }
 
-    public void deletar(Long id) {
+    public void deletar(Long id) throws Exception{
 
         Optional<Diretor> diretorExistente = diretorRepository.findById(id);
 
         if (diretorExistente.isPresent()) {
-            diretorRepository.delete(diretorExistente.get());
+
+            if(diretorExistente.get().getTitulos().isEmpty()){
+                diretorRepository.delete(diretorExistente.get());
+            }else{
+                throw new Exception("Diretor está relacionado a um ou mais títulos e não pode ser excluído.");
+            }
+
         } else {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Diretor não encontrado");
         }

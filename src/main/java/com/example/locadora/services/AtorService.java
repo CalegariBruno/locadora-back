@@ -34,12 +34,18 @@ public class AtorService {
 
     }
 
-    public void deletar(Long id) {
+    public void deletar(Long id) throws Exception{
 
         Optional<Ator> ator = atorRepository.findById(id);
 
         if (ator.isPresent()) {
-            atorRepository.delete(ator.get());
+
+            if (ator.get().getTitulos().isEmpty()) {
+                atorRepository.delete(ator.get());
+            } else {
+                throw new Exception("Ator está relacionado a um ou mais títulos e não pode ser excluído.");
+            }
+
         } else {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Ator não encontrado!");
         }

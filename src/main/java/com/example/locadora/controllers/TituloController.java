@@ -49,7 +49,7 @@ public class TituloController {
             @ApiResponse(responseCode = "404", description = "Caso o título não seja encontrado."),
             @ApiResponse(responseCode = "500", description = "Caso não tenha sido possível realizar a operação.")
     })
-    public void deletar(@PathVariable Long id) {
+    public void deletar(@PathVariable Long id) throws Exception{
         tituloService.deletar(id);
     }
 

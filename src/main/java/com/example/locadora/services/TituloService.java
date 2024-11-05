@@ -42,12 +42,18 @@ public class TituloService {
         }
     }
 
-    public void deletar(Long id) {
+    public void deletar(Long id) throws Exception{
 
         Optional<Titulo> titulo = tituloRepository.findById(id);
 
         if (titulo.isPresent()) {
-            tituloRepository.delete(titulo.get());
+
+            if(titulo.get().getItens().isEmpty()){
+                tituloRepository.delete(titulo.get());
+            } else{
+                throw new Exception("Título está relacionado a um ou mais itens e não pode ser excluído.");
+            }
+
         } else {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Título não encontrado!");
         }

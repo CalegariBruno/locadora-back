@@ -44,7 +44,7 @@ public class AtorController {
     @DeleteMapping("/deletar/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @Operation(description = "Deleta o ator dado o ID.")
-    public void deletar(@PathVariable Long id) {
+    public void deletar(@PathVariable Long id) throws Exception{
         atorService.deletar(id);
     }
 
