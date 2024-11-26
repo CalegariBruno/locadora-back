@@ -38,6 +38,8 @@ public class Locacao {
     @JoinColumn(name = "id_item", nullable = false)
     private Item item;
 
-    //private Cliente cliente;
+    @ManyToOne
+    @JoinColumn(name = "id_cliente", nullable = false)
+    private Cliente cliente;
 
 }
