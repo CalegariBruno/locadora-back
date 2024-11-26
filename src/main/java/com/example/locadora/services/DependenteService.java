@@ -1,5 +1,6 @@
 package com.example.locadora.services;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.Random;
 
@@ -30,11 +31,42 @@ public class DependenteService {
             Dependente dependente = dependenteExistente.get();
             dependente.setNome(dependenteAtualizado.getNome());
             dependente.setDataNascimento(dependenteAtualizado.getDataNascimento());
+            dependente.setLocacoes(dependenteAtualizado.getLocacoes());
+            dependente.setNumeroInscricao(dependenteAtualizado.getNumeroInscricao());
+            dependente.setSexo(dependenteAtualizado.getSexo());
+            dependente.setSocio(dependenteAtualizado.getSocio());            
             return dependenteRepository.save(dependente);
         } else {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Dependente não encontrado");
         }
 
+    }
+
+    public void deletar(Long id) throws Exception{
+
+        Optional<Dependente> dependente = dependenteRepository.findById(id);
+
+        if (dependente.isPresent()) {
+
+            if(dependente.get().getLocacoes().isEmpty()){
+                dependenteRepository.delete(dependente.get());
+            }else{
+                throw new Exception("Cliente está relacionado a uma ou mais locações e não pode ser excluído.");
+            }
+
+            dependenteRepository.delete(dependente.get());
+        } else {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Cliente não encontrado!");
+        }
+    }
+
+    public List<Dependente> listarTodos() {
+        return dependenteRepository.findAll();
+    }
+
+    public Dependente buscarPorId(Long id) {
+        return dependenteRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Cliente não encontrado!"));
     }
 
     public int gerarNumeroInscricao() {
