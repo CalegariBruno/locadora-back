@@ -36,11 +36,18 @@ public class ItemService {
         }
     }
 
-    public void deletar(Long id) {
+    public void deletar(Long id) throws Exception{
 
         Optional<Item> item = itemRepository.findById(id);
 
         if (item.isPresent()) {
+
+            if(item.get().getLocacoes().isEmpty()){
+                itemRepository.delete(item.get());
+            }else{
+                throw new Exception("Item está relacionado a uma ou mais locações e não pode ser excluído.");
+            }
+
             itemRepository.delete(item.get());
         } else {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Item não encontrado!");
