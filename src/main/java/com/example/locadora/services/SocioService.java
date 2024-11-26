@@ -15,12 +15,20 @@ import com.example.locadora.repositories.SocioRepository;
 
 @Service
 public class SocioService {
-    
+
     @Autowired
     private SocioRepository socioRepository;
 
+    private int flag = 0;
+
     public Socio salvar(Socio socio){
         socio.setAtivo(true);
+        
+        if (flag == 0) {
+            socio.setNumeroInscricao(gerarNumeroInscricao());  
+            flag = 1;          
+        } 
+
         return socioRepository.save(socio);
     }
 
@@ -35,7 +43,6 @@ public class SocioService {
             socio.setCpf(socioAtualizado.getCpf());
             socio.setDataNascimento(socioAtualizado.getDataNascimento());
             socio.setEndereco(socioAtualizado.getEndereco());
-            socio.setNumeroInscricao(gerarNumeroInscricao());
             return socioRepository.save(socio);
         } else {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Socio não encontrado");

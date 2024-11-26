@@ -1,9 +1,8 @@
 package com.example.locadora.domain;
+import java.util.Set;
 
-import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -14,29 +13,17 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class Socio {
-    
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+public class Socio extends Cliente{
 
-    private String nome;
+    private String endereco;
 
-    @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "endereco_id")
-    private Endereco endereco;
-
-    private String telefone;
-    private String sexo;
+    @NotNull
     private String cpf;
-    private LocalDate dataNascimento;
-    private boolean ativo;
-
-    @Column(unique = true, nullable = false)
-    private int numeroInscricao;
+    
+    private String telefone;
 
     @OneToMany(mappedBy = "socio", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Dependente> dependentes = new ArrayList<>();
+    private Set<Dependente> dependentes;
 
 }
 
