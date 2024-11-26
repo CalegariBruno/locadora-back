@@ -18,16 +18,11 @@ public class SocioService {
 
     @Autowired
     private SocioRepository socioRepository;
-
-    private int flag = 0;
-
+    
     public Socio salvar(Socio socio){
-        socio.setAtivo(true);
         
-        if (flag == 0) {
-            socio.setNumeroInscricao(gerarNumeroInscricao());  
-            flag = 1;          
-        } 
+        socio.setAtivo(true);
+        socio.setNumeroInscricao(gerarNumeroInscricao()); 
 
         return socioRepository.save(socio);
     }

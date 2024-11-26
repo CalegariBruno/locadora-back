@@ -5,12 +5,9 @@ import com.example.locadora.repositories.ClasseRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
-
 import java.util.List;
 import java.util.Optional;
-
 @Service
 public class ClasseService {
 
@@ -36,19 +33,12 @@ public class ClasseService {
         }
     }
 
-    public void deletar(Long id) throws Exception{
+    public void deletar(Long id) {
 
         Optional<Classe> classeExistente = classeRepository.findById(id);
 
         if (classeExistente.isPresent()) {
-
-            if(classeExistente.get().getTitulos().isEmpty()){
-                classeRepository.delete(classeExistente.get());
-            } else {
-                throw new Exception("Classe está relacionada a um ou mais títulos e não pode ser excluída.");
-            }
-
-
+            classeRepository.delete(classeExistente.get());
         } else {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Classe não encontrada");
         }

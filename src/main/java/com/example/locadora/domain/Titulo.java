@@ -2,7 +2,6 @@ package com.example.locadora.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -47,7 +46,6 @@ public class Titulo {
             joinColumns = @JoinColumn(name = "id_titulo"),
             inverseJoinColumns = @JoinColumn(name = "id_ator")
     )
-    @NotNull
     private Set<Ator> atores;
 
 }
