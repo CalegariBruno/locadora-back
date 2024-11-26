@@ -42,7 +42,7 @@ public abstract class Cliente {
     private boolean ativo;
 
     @JsonIgnore
-    @OneToMany(mappedBy = "item")
+    @OneToMany(mappedBy = "cliente")
     private Set<Locacao> locacoes; 
 
 }
