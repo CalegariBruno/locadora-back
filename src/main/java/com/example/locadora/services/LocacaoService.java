@@ -18,7 +18,7 @@ public class LocacaoService {
     
     public Locacao salvar(Locacao locacao) {
         verificarItemNaoNulo(locacao);
-        //verificarClienteNaoNulo(locacao)
+        verificarClienteNaoNulo(locacao);
         return locacaoRepository.save(locacao);
     }
 
@@ -34,8 +34,10 @@ public class LocacaoService {
             locacao.setValorCobrado(locacaoAtualizada.getValorCobrado());
             locacao.setMultaCobrada(locacaoAtualizada.getMultaCobrada());
             locacao.setItem(locacaoAtualizada.getItem());
+            locacao.setCliente(locacaoAtualizada.getCliente());
 
             verificarItemNaoNulo(locacao);
+            verificarClienteNaoNulo(locacao);
             return locacaoRepository.save(locacao);
         } else {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Locação não encontrada!");
@@ -65,6 +67,12 @@ public class LocacaoService {
     private void verificarItemNaoNulo(Locacao locacao) {
         if (locacao.getItem() == null) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "A locação deve estar associada a um item.");
+        }
+    }
+
+    private void verificarClienteNaoNulo(Locacao locacao) {
+        if (locacao.getCliente() == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "A locação deve estar associada a um cliente.");
         }
     }
 }
