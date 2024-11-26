@@ -38,6 +38,7 @@ public class SocioService {
             socio.setCpf(socioAtualizado.getCpf());
             socio.setDataNascimento(socioAtualizado.getDataNascimento());
             socio.setEndereco(socioAtualizado.getEndereco());
+            socio.setLocacoes(socioAtualizado.getLocacoes());
             return socioRepository.save(socio);
         } else {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Socio não encontrado");
@@ -71,6 +72,12 @@ public class SocioService {
             if (!socioExistente.get().getDependentes().isEmpty()) {
                 socioExistente.get().getDependentes().clear();
             } 
+
+            if(socioExistente.get().getLocacoes().isEmpty()){
+                socioRepository.delete(socioExistente.get());
+            }else{
+                throw new Exception("Cliente está relacionado a uma ou mais locações e não pode ser excluído.");
+            }
 
             socioRepository.delete(socioExistente.get());
         }
