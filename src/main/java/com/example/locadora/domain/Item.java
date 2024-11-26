@@ -1,8 +1,10 @@
 package com.example.locadora.domain;
 
 import java.time.LocalDate;
+import java.util.Set;
 
 import com.example.locadora.domain.enums.tipoItemEnum;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -31,4 +33,9 @@ public class Item {
     @ManyToOne
     @JoinColumn(name = "id_titulo", nullable = false)
     private Titulo titulo;
+
+    @JsonIgnore
+    @OneToMany(mappedBy = "item")
+    private Set<Locacao> locacoes;
+
 }
