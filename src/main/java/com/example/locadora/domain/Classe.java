@@ -26,7 +26,7 @@ public class Classe {
     private Double valor;
 
     @JoinColumn(name = "prazo_devolucao")
-    private LocalDate prazoDevolucao;
+    private Integer prazoDevolucao;
 
     @JsonIgnore
     @OneToMany(mappedBy = "classe")

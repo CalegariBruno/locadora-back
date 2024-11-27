@@ -1,6 +1,7 @@
 package com.example.locadora.controllers;
 
 import com.example.locadora.domain.Locacao;
+import com.example.locadora.dtos.LocacaoDTO;
 import com.example.locadora.services.LocacaoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -25,8 +26,8 @@ public class LocacaoController {
             @ApiResponse(responseCode = "400", description = "O servidor não pode processar a requisição devido a um erro no cliente."),
             @ApiResponse(responseCode = "500", description = "Caso não tenha sido possível realizar a operação.")
     })
-    public ResponseEntity<Locacao> salvar(@RequestBody Locacao locacao) {
-        Locacao novaLocacao = locacaoService.salvar(locacao);
+    public ResponseEntity<Locacao> criarLocacao(@RequestBody LocacaoDTO locacao) {
+        Locacao novaLocacao = locacaoService.efetuarLocacao(locacao);
         return ResponseEntity.status(HttpStatus.CREATED).body(novaLocacao);
     }
 

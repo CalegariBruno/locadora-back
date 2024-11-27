@@ -5,22 +5,16 @@ import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Inheritance;
-import jakarta.persistence.InheritanceType;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.SequenceGenerator;
+
+import com.example.locadora.domain.enums.sexoEnum;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Inheritance(strategy = InheritanceType.TABLE_PER_CLASS)
+@Inheritance(strategy = InheritanceType.JOINED)
 @Getter
 @Setter
 @AllArgsConstructor
@@ -38,8 +32,10 @@ public abstract class Cliente {
 
     private String nome;
     private LocalDate dataNascimento;
-    private String sexo;
     private boolean ativo;
+
+    @Enumerated(EnumType.STRING)
+    private sexoEnum sexo;
 
     @JsonIgnore
     @OneToMany(mappedBy = "cliente")
