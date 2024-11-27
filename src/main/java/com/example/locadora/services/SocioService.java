@@ -11,6 +11,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import com.example.locadora.domain.Dependente;
 import com.example.locadora.domain.Socio;
+import com.example.locadora.repositories.DependenteRepository;
 import com.example.locadora.repositories.SocioRepository;
 
 @Service
@@ -18,6 +19,9 @@ public class SocioService {
 
     @Autowired
     private SocioRepository socioRepository;
+
+    @Autowired
+    private DependenteRepository dependenteRepository;
     
     public Socio salvar(Socio socio){
         
@@ -46,30 +50,13 @@ public class SocioService {
 
     }
 
-    public Dependente inserirDependente (Long socioId, Dependente dependente) {
-
-        Optional<Socio> socioExistente = socioRepository.findById(socioId);
-
-        Socio socio = socioExistente.get();
-        if ( socio.getDependentes().size() < 3 ) {
-            throw new RuntimeException("O sócio já possui o número máximo de dependentes (3)");            
-        } else {
-            dependente.setAtivo(true);
-            dependente.setSocio(socio);
-            socio.getDependentes().add(dependente);
-            dependente.setNumeroInscricao(gerarNumeroInscricao());
-            socioRepository.save(socio);
-        }
-        return dependente;
-    }
-
     public void deletar(Long id) throws Exception{
 
         Optional<Socio> socioExistente = socioRepository.findById(id);
 
         if (socioExistente.isPresent()) {
 
-            if (!socioExistente.get().getDependentes().isEmpty()) {
+            if (!socioExistente.get().getDependentes().isEmpty()) {               
                 socioExistente.get().getDependentes().clear();
             } 
 
@@ -87,39 +74,55 @@ public class SocioService {
         return socioRepository.findAll();
     }
 
+    public List<Socio> listarSociosLiberados () {
+        List<Socio> sociosLiberados = socioRepository.findAll();
+
+        for(Socio s : sociosLiberados) {
+            if (s.isAtivo()) {
+                if(!temMenosDeTresAtivos(s)) {
+                    sociosLiberados.remove(s);
+                }
+            }
+            
+        }
+        return sociosLiberados;
+    }
+
     public Socio buscarPorId(Long id) {
         return socioRepository.findById(id)
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Socio não encontrado"));
     }
 
-    public void desativarSocio (Long id) {
+    public Socio desativarSocio (Long id) {
         Optional<Socio> socioExistente = socioRepository.findById(id);
 
         if (socioExistente.isPresent()) {
             socioExistente.get().setAtivo(false);
             for(Dependente d : socioExistente.get().getDependentes()){
                 d.setAtivo(false);
+                dependenteRepository.save(d);
             }
         }
+        
+        return socioRepository.save(socioExistente.get());
     }
 
-    public void reativarSocio (Long id) {
+    public Socio reativarSocio (Long id) {
         Optional<Socio> socioExistente = socioRepository.findById(id);
 
         if (socioExistente.isPresent()) {
             socioExistente.get().setAtivo(true);
+            int i = 0;
             for(Dependente d : socioExistente.get().getDependentes()){
+                if (i == 3) {
+                    break;
+                }
                 d.setAtivo(true);
+                dependenteRepository.save(d);
+                i++;
             }
         }
-    }
-
-    public void desativarDependente (Dependente dependente) {
-        dependente.setAtivo(false);
-    }
-
-    public void reativarDependente (Dependente dependente) {
-        dependente.setAtivo(true);
+        return socioRepository.save(socioExistente.get());
     }
 
     public int gerarNumeroInscricao() {
@@ -131,6 +134,23 @@ public class SocioService {
         } while (socioRepository.existsByNumeroInscricao(numero)); // Verifica unicidade no banco
 
         return numero;
-    }    
+    }  
     
+    private boolean temMenosDeTresAtivos (Socio socio) {
+
+        if (!socio.getDependentes().isEmpty()) {
+            
+            int ativos = 0;
+            for(Dependente dependente : socio.getDependentes()) {
+                if(dependente.isAtivo()) {
+                    ativos++;
+                    if (ativos >= 3) { // Interrompe o loop se encontrar 3 ativos
+                        return false;
+                    }
+                }
+            }    
+        } 
+
+        return true;
+    }
 }

@@ -65,11 +65,40 @@ public class SocioController {
         return ResponseEntity.ok(socios);
     }
 
+    @GetMapping("/listarLiberados")
+    @Operation(description = "Lista todos os socios.")
+    public ResponseEntity<List<Socio>> listarLiberados() {
+        List<Socio> socios = socioService.listarSociosLiberados();
+        return ResponseEntity.ok(socios);
+    }
+
     @GetMapping("/buscar/{id}")
     @Operation(description = "Busca o socio por ID.")
     public ResponseEntity<Socio> buscarPorId(@PathVariable Long id) {
         Socio socio = socioService.buscarPorId(id);
         return ResponseEntity.ok(socio);
+    }
+
+    @PutMapping("/desativar/{id}")
+    @Operation(description = "Dado o id, o socio é desativado.", responses = {
+            @ApiResponse(responseCode = "200", description = "Caso o socio seja desativado com sucesso."),
+            @ApiResponse(responseCode = "400", description = "O servidor não pode processar a requisição devido a alguma coisa que foi entendida como um erro do cliente."),
+            @ApiResponse(responseCode = "500", description = "Caso não tenha sido possível realizar a operação.")
+    })
+    public ResponseEntity<Socio> desativar(@PathVariable Long id, @RequestBody Socio socio) {
+        Socio socioDesativado = socioService.desativarSocio(id);
+        return ResponseEntity.ok(socioDesativado);
+    }
+
+    @PutMapping("/reativar/{id}")
+    @Operation(description = "Dado o id, o socio é desativado.", responses = {
+            @ApiResponse(responseCode = "200", description = "Caso o socio seja desativado com sucesso."),
+            @ApiResponse(responseCode = "400", description = "O servidor não pode processar a requisição devido a alguma coisa que foi entendida como um erro do cliente."),
+            @ApiResponse(responseCode = "500", description = "Caso não tenha sido possível realizar a operação.")
+    })
+    public ResponseEntity<Socio> ativar(@PathVariable Long id, @RequestBody Socio socio) {
+        Socio socioReativado = socioService.reativarSocio(id);
+        return ResponseEntity.ok(socioReativado);
     }
 
 }

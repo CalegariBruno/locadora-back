@@ -1,4 +1,5 @@
 package com.example.locadora.domain;
+import java.util.HashSet;
 import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -25,7 +26,7 @@ public class Socio extends Cliente{
 
     @JsonIgnore
     @OneToMany(mappedBy = "socio", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<Dependente> dependentes;
+    private Set<Dependente> dependentes = new HashSet<>();
 
 }
 
