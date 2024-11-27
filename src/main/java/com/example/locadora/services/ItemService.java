@@ -58,6 +58,10 @@ public class ItemService {
         return itemRepository.findAll();
     }
 
+    public List<Item> listarItensDisponiveis() {
+        return itemRepository.findItemsWithNoLocacoesOrPaidLocacoes();
+    }
+
     public Item buscarPorId(Long id) {
         return itemRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Item não encontrado!"));

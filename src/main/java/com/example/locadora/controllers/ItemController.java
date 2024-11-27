@@ -62,6 +62,15 @@ public class ItemController {
         return ResponseEntity.ok(itens);
     }
 
+    @GetMapping("/listar/locacao")
+    @Operation(description = "Lista itens para locação", responses = {
+            @ApiResponse(responseCode = "200", description = "Lista de itens retornada com sucesso.")
+    })
+    public ResponseEntity<List<Item>> listarItensDisponiveis() {
+        List<Item> itens = itemService.listarItensDisponiveis();
+        return ResponseEntity.ok(itens);
+    }
+
     @GetMapping("/buscar/{id}")
     @Operation(description = "Busca um item pelo ID.", responses = {
             @ApiResponse(responseCode = "200", description = "Item retornado com sucesso."),
