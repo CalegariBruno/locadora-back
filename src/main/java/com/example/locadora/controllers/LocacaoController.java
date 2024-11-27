@@ -1,6 +1,7 @@
 package com.example.locadora.controllers;
 
 import com.example.locadora.domain.Locacao;
+import com.example.locadora.dtos.DevolucaoDTO;
 import com.example.locadora.dtos.LocacaoDTO;
 import com.example.locadora.services.LocacaoService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,8 +38,8 @@ public class LocacaoController {
             @ApiResponse(responseCode = "400", description = "O servidor não pode processar a requisição devido a um erro no cliente."),
             @ApiResponse(responseCode = "500", description = "Caso não tenha sido possível realizar a operação.")
     })
-    public ResponseEntity<Locacao> criarDevolucao(@RequestBody int numSerieItem, @RequestBody Double multa) {
-        Locacao novaLocacao = locacaoService.efetuarDevolucao(numSerieItem,multa);
+    public ResponseEntity<Locacao> criarDevolucao(@RequestBody DevolucaoDTO devolucao) {
+        Locacao novaLocacao = locacaoService.efetuarDevolucao(devolucao.numSerieItem(),devolucao.multa());
         return ResponseEntity.status(HttpStatus.CREATED).body(novaLocacao);
     }
 
