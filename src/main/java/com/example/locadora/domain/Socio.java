@@ -24,7 +24,7 @@ public class Socio extends Cliente{
     private String telefone;
 
     @JsonIgnore
-    @OneToMany(mappedBy = "socio", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "socio")
     private Set<Dependente> dependentes;
 
 }
