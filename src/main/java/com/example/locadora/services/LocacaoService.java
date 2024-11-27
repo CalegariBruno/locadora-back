@@ -6,6 +6,7 @@ import com.example.locadora.domain.Item;
 import com.example.locadora.domain.Locacao;
 import com.example.locadora.dtos.LocacaoDTO;
 import com.example.locadora.repositories.*;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -26,14 +27,9 @@ public class LocacaoService {
 
     @Autowired
     private ClienteRepository clienteRepository;
-    
-//    public Locacao salvar(Locacao locacao) {
-//        verificarItemNaoNulo(locacao);
-//        verificarClienteNaoNulo(locacao);
-//        return locacaoRepository.save(locacao);
-//    }
 
-    public Locacao efetuarLocacao(LocacaoDTO locacao){
+    @Transactional
+    public Locacao efetuarLocacao(LocacaoDTO locacao) {
 
         Item item = itemRepository.findById(locacao.item().getId())
                 .orElseThrow(()-> new ResponseStatusException(HttpStatus.NOT_FOUND, "Item não encontrado!"));
@@ -46,6 +42,11 @@ public class LocacaoService {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Cliente está em débito e não pode realizar a locação.");
         }
 
+        // Verifica se o item já está locado
+        if (itemJaLocado(item)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Item já locado.");
+        }
+
         // Obtém a classe do título associado ao item
         Classe classe = item.getTitulo().getClasse();
 
@@ -53,6 +54,7 @@ public class LocacaoService {
         Double valorLocacao = classe.getValor();
         LocalDate dataLocacao = LocalDate.now();
         LocalDate dataDevolucaoPrevista = dataLocacao.plusDays(classe.getPrazoDevolucao());
+        LocalDate dataDevolucaoEfetiva;
 
         // Permite alteração pelo funcionário (se aplicável)
         if (locacao.valorAlterado() != null) {
@@ -60,13 +62,22 @@ public class LocacaoService {
         }
 
         if (locacao.dtDevolucaoAlterado() != null) {
-            dataDevolucaoPrevista = locacao.dtDevolucaoAlterado();
+
+            if(locacao.dtDevolucaoAlterado().isBefore(dataLocacao)){
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Data de devolução não pode ser anterior a data de locação.");
+            }else{
+                dataDevolucaoEfetiva = locacao.dtDevolucaoAlterado();
+            }
+
+        }else{
+            dataDevolucaoEfetiva = dataDevolucaoPrevista;
         }
 
         // Cria uma nova locação
         Locacao novaLocacao = new Locacao();
         novaLocacao.setDtLocacao(dataLocacao);
         novaLocacao.setDtDevolucaoPrevista(dataDevolucaoPrevista);
+        novaLocacao.setDtDevolucaoEfetiva(dataDevolucaoEfetiva);
         novaLocacao.setValorCobrado(valorLocacao);
         novaLocacao.setItem(item);
         novaLocacao.setCliente(cliente);
@@ -75,34 +86,90 @@ public class LocacaoService {
         return locacaoRepository.save(novaLocacao);
     }
 
-    public Locacao editar(Long id, Locacao locacaoAtualizada) {
+    @Transactional
+    public Locacao editarEfetuarLocacao(Long id, LocacaoDTO locacaoAtualizada) {
 
         Optional<Locacao> locacaoExistente = locacaoRepository.findById(id);
 
         if (locacaoExistente.isPresent()) {
+
             Locacao locacao = locacaoExistente.get();
-            locacao.setDtLocacao(locacaoAtualizada.getDtLocacao());
-            locacao.setDtDevolucaoPrevista(locacaoAtualizada.getDtDevolucaoPrevista());
-            locacao.setDtDevolucaoEfetiva(locacaoAtualizada.getDtDevolucaoEfetiva());
-            locacao.setValorCobrado(locacaoAtualizada.getValorCobrado());
-            locacao.setMultaCobrada(locacaoAtualizada.getMultaCobrada());
-            locacao.setItem(locacaoAtualizada.getItem());
-            locacao.setCliente(locacaoAtualizada.getCliente());
-//
-//            verificarItemNaoNulo(locacao);
-//            verificarClienteNaoNulo(locacao);
+            locacao.setDtLocacao(LocalDate.now());
+            locacao.setValorCobrado(locacaoAtualizada.valorAlterado());
+            locacao.setItem(locacaoAtualizada.item());
+            locacao.setCliente(locacaoAtualizada.cliente());
+
+            if(locacaoAtualizada.dtDevolucaoAlterado().isBefore(LocalDate.now())){
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Data de devolução não pode ser anterior a data de locação.");
+            }else{
+                locacao.setDtDevolucaoPrevista(locacaoAtualizada.dtDevolucaoAlterado());
+                locacao.setDtDevolucaoEfetiva(locacaoAtualizada.dtDevolucaoAlterado());
+            }
+
             return locacaoRepository.save(locacao);
         } else {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Locação não encontrada!");
         }
     }
 
+    @Transactional
+    public Locacao efetuarPagamento(Long id) {
+
+        Optional<Locacao> locacaoExistente = locacaoRepository.findById(id);
+
+        if (locacaoExistente.isPresent()) {
+
+            Locacao locacao = locacaoExistente.get();
+            locacao.setPago(true);
+
+            return locacaoRepository.save(locacao);
+        } else {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Locação não encontrada!");
+        }
+    }
+
+    @Transactional
+    public Locacao efetuarDevolucao(int numSerieItem, Double multa){
+
+        Item item = itemRepository.findByNumSerie(numSerieItem)
+                .orElseThrow(()-> new ResponseStatusException(HttpStatus.NOT_FOUND, "Item não encontrado!"));
+
+        Locacao locacao = locacaoRepository.findByItemAndPagoFalse(item)
+                .orElseThrow(()-> new ResponseStatusException(HttpStatus.NOT_FOUND, "Locação não encontrada!"));
+
+        // verificar se a locacao ja foi paga
+        if(locacao.isPago()){
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Devolução já foi feita.");
+        }
+
+        // verificar se a devolucao esta atrasada
+        if(locacao.getDtDevolucaoEfetiva().isBefore(LocalDate.now())){
+            locacao.setMultaCobrada(multa);
+            locacao.setValorCobrado(locacao.getValorCobrado() + multa);
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Devolução atrasada. Pague a multa.");
+        }
+
+        // registrar devolução
+        locacao.setDtDevolucaoEfetiva(LocalDate.now());
+        locacao.setPago(true);
+
+        return locacaoRepository.save(locacao);
+    }
+
     public void deletar(Long id) throws Exception {
 
         Optional<Locacao> locacao = locacaoRepository.findById(id);
 
-        if (locacao.isPresent()) {            
-            locacaoRepository.delete(locacao.get());
+        if (locacao.isPresent()) {
+
+            Locacao locacaoDelete = locacao.get();
+
+            if(locacaoDelete.isPago()){
+                throw new Exception("Locação já foi paga e não pode ser cancelada.");
+            }else {
+                locacaoRepository.delete(locacao.get());
+            }
+
         } else {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Locação não encontrada!");
         }
@@ -118,20 +185,25 @@ public class LocacaoService {
     }
 
     private boolean clientePossuiDebito(Cliente cliente) {
-        // Lógica para verificar se o cliente possui débito
-        // Por exemplo: consultar locações anteriores do cliente que não foram quitadas
+        if (cliente.getLocacoes() != null) {
+            for (Locacao locacao : cliente.getLocacoes()) {
+                if (!locacao.isPago()) { // Verifica se locacao nao foi paga
+                    return true;
+                }
+            }
+        }
         return false;
     }
 
-//    private void verificarItemNaoNulo(Locacao locacao) {
-//        if (locacao.getItem() == null) {
-//            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "A locação deve estar associada a um item.");
-//        }
-//    }
-//
-//    private void verificarClienteNaoNulo(Locacao locacao) {
-//        if (locacao.getCliente() == null) {
-//            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "A locação deve estar associada a um cliente.");
-//        }
-//    }
+    private boolean itemJaLocado(Item item) {
+        if (item.getLocacoes() != null) {
+            for (Locacao locacao : item.getLocacoes()) {
+                if (!locacao.isPago()) { // Verifica se locacao nao foi paga
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
 }

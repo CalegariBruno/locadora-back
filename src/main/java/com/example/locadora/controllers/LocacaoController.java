@@ -20,7 +20,7 @@ public class LocacaoController {
     @Autowired
     private LocacaoService locacaoService;
 
-    @PostMapping("/criar")
+    @PostMapping("/efetuarLocacao")
     @Operation(description = "Cria uma nova locação, fornecendo os detalhes necessários.", responses = {
             @ApiResponse(responseCode = "201", description = "Caso a locação seja inserida com sucesso."),
             @ApiResponse(responseCode = "400", description = "O servidor não pode processar a requisição devido a um erro no cliente."),
@@ -31,6 +31,17 @@ public class LocacaoController {
         return ResponseEntity.status(HttpStatus.CREATED).body(novaLocacao);
     }
 
+    @PostMapping("/efetuarDevolucao")
+    @Operation(description = "Cria uma nova devolução, fornecendo os detalhes necessários.", responses = {
+            @ApiResponse(responseCode = "201", description = "Caso a locação seja inserida com sucesso."),
+            @ApiResponse(responseCode = "400", description = "O servidor não pode processar a requisição devido a um erro no cliente."),
+            @ApiResponse(responseCode = "500", description = "Caso não tenha sido possível realizar a operação.")
+    })
+    public ResponseEntity<Locacao> criarDevolucao(@RequestBody int numSerieItem, @RequestBody Double multa) {
+        Locacao novaLocacao = locacaoService.efetuarDevolucao(numSerieItem,multa);
+        return ResponseEntity.status(HttpStatus.CREATED).body(novaLocacao);
+    }
+
     @PutMapping("/editar/{id}")
     @Operation(description = "Edita uma locação existente dado o ID.", responses = {
             @ApiResponse(responseCode = "200", description = "Caso a locação seja editada com sucesso."),
@@ -38,8 +49,8 @@ public class LocacaoController {
             @ApiResponse(responseCode = "404", description = "Caso a locação não seja encontrada."),
             @ApiResponse(responseCode = "500", description = "Caso não tenha sido possível realizar a operação.")
     })
-    public ResponseEntity<Locacao> editar(@PathVariable Long id, @RequestBody Locacao locacaoAtualizada) {
-        Locacao locacaoEditada = locacaoService.editar(id, locacaoAtualizada);
+    public ResponseEntity<Locacao> editar(@PathVariable Long id, @RequestBody LocacaoDTO locacaoAtualizada) {
+        Locacao locacaoEditada = locacaoService.editarEfetuarLocacao(id, locacaoAtualizada);
         return ResponseEntity.ok(locacaoEditada);
     }
 
@@ -72,4 +83,18 @@ public class LocacaoController {
         Locacao locacao = locacaoService.buscarPorId(id);
         return ResponseEntity.ok(locacao);
     }
+
+
+    //    @PutMapping("/pagamento/{id}")
+//    @Operation(description = "Edita uma locação existente dado o ID.", responses = {
+//            @ApiResponse(responseCode = "200", description = "Caso a locação seja editada com sucesso."),
+//            @ApiResponse(responseCode = "400", description = "O servidor não pode processar a requisição devido a um erro no cliente."),
+//            @ApiResponse(responseCode = "404", description = "Caso a locação não seja encontrada."),
+//            @ApiResponse(responseCode = "500", description = "Caso não tenha sido possível realizar a operação.")
+//    })
+//    public ResponseEntity<Locacao> pagamento(@PathVariable Long id) {
+//        Locacao locacaoEditada = locacaoService.efetuarPagamento(id);
+//        return ResponseEntity.ok(locacaoEditada);
+//    }
+
 }

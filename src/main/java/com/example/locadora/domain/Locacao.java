@@ -32,7 +32,9 @@ public class Locacao {
 
     private Double valorCobrado;
 
-    private Double multaCobrada;
+    private Double multaCobrada = 0.0;
+
+    private boolean pago = false;
 
     @ManyToOne
     @JoinColumn(name = "id_item", nullable = false)
