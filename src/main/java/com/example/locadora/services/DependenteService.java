@@ -108,16 +108,4 @@ public class DependenteService {
             throw new IllegalStateException("O sócio já possui 3 dependentes ativos.");
         }
     }
-    
-
-    public int gerarNumeroInscricao() {
-        Random random = new Random();
-        int numero;
-
-        do {
-            numero = 100000000 + random.nextInt(900000000); 
-        } while (dependenteRepository.existsByNumeroInscricao(numero)); // Verifica unicidade no banco
-
-        return numero;
-    }  
 }

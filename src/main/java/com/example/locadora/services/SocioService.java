@@ -2,7 +2,6 @@ package com.example.locadora.services;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.Random;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -26,8 +25,6 @@ public class SocioService {
     public Socio salvar(Socio socio){
         
         socio.setAtivo(true);
-        socio.setNumeroInscricao(gerarNumeroInscricao()); 
-
         return socioRepository.save(socio);
     }
 
@@ -75,17 +72,7 @@ public class SocioService {
     }
 
     public List<Socio> listarSociosLiberados () {
-        List<Socio> sociosLiberados = socioRepository.findAll();
-
-        for(Socio s : sociosLiberados) {
-            if (s.isAtivo()) {
-                if(!temMenosDeTresAtivos(s)) {
-                    sociosLiberados.remove(s);
-                }
-            }
-            
-        }
-        return sociosLiberados;
+        return socioRepository.findSociosWithLessThan3ActiveDependentes();
     }
 
     public Socio buscarPorId(Long id) {
@@ -124,33 +111,5 @@ public class SocioService {
         }
         return socioRepository.save(socioExistente.get());
     }
-
-    public int gerarNumeroInscricao() {
-        Random random = new Random();
-        int numero;
-
-        do {
-            numero = 100000000 + random.nextInt(900000000); 
-        } while (socioRepository.existsByNumeroInscricao(numero)); // Verifica unicidade no banco
-
-        return numero;
-    }  
-    
-    private boolean temMenosDeTresAtivos (Socio socio) {
-
-        if (!socio.getDependentes().isEmpty()) {
-            
-            int ativos = 0;
-            for(Dependente dependente : socio.getDependentes()) {
-                if(dependente.isAtivo()) {
-                    ativos++;
-                    if (ativos >= 3) { // Interrompe o loop se encontrar 3 ativos
-                        return false;
-                    }
-                }
-            }    
-        } 
-
-        return true;
-    }
+        
 }
