@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
@@ -44,6 +45,13 @@ public class ClienteController {
         return ResponseEntity.ok(dependentes);
     }
 
+    @GetMapping("/buscar/{id}")
+    @Operation(description = "Busca ator por ID.")
+    public ResponseEntity<Cliente> buscarPorId(@PathVariable Long id) {
+        Cliente cliente = clienteService.buscarPorId(id);
+        return ResponseEntity.ok(cliente);
+    }
+
     @PostMapping("/socio/criar")
     @Operation(description = "Dado o nome, cadastra um socio.", responses = {
             @ApiResponse(responseCode = "200", description = "Caso o socio seja inserido com sucesso."),
@@ -61,7 +69,7 @@ public class ClienteController {
             @ApiResponse(responseCode = "400", description = "O servidor não pode processar a requisição devido a alguma coisa que foi entendida como um erro do cliente."),
             @ApiResponse(responseCode = "500", description = "Caso não tenha sido possível realizar a operação.")
     })
-    public ResponseEntity<Dependente> salvarSocio(@RequestBody Dependente dependente) {
+    public ResponseEntity<Dependente> salvarSocio(@RequestBody Dependente dependente) throws Exception {
         Dependente novoDependente = clienteService.criarDependente(dependente);
         return ResponseEntity.status(HttpStatus.CREATED).body(novoDependente);
     }
@@ -88,12 +96,37 @@ public class ClienteController {
         return ResponseEntity.ok(dependenteEditada);
     }
 
-    @GetMapping("/buscar/{id}")
-    @Operation(description = "Busca ator por ID.")
-    public ResponseEntity<Cliente> buscarPorId(@PathVariable Long id) {
-        Cliente cliente = clienteService.buscarPorId(id);
-        return ResponseEntity.ok(cliente);
-    }    
+    // Método para alterar o status do socio
+    @PutMapping("/socio/status/{id}")
+    @Operation(description = "Dado o id, a cliente é ativada/desativada.", responses = {
+            @ApiResponse(responseCode = "200", description = "Caso o ativo da arbitragem seja editado com sucesso."),
+            @ApiResponse(responseCode = "400", description = "O servidor não pode processar a requisição devido a alguma coisa que foi entendida como um erro do cliente."),
+            @ApiResponse(responseCode = "500", description = "Caso não tenha sido possível realizar a operação.")
+    })
+    public ResponseEntity<String> mudarStatusSocio(@PathVariable Long id, @RequestBody boolean status) {
+        try {
+            clienteService.alterarStatusSocio(id, status);
+            return ResponseEntity.ok("Status do cliente editado com sucesso");
+        } catch (ResponseStatusException erro) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Erro: " + erro.getMessage());
+        }
+    }
+
+    // Método para alterar o status do dependente
+    @PutMapping("/dependente/status/{id}")
+    @Operation(description = "Dado o id, a cliente é ativada/desativada.", responses = {
+            @ApiResponse(responseCode = "200", description = "Caso o ativo da arbitragem seja editado com sucesso."),
+            @ApiResponse(responseCode = "400", description = "O servidor não pode processar a requisição devido a alguma coisa que foi entendida como um erro do cliente."),
+            @ApiResponse(responseCode = "500", description = "Caso não tenha sido possível realizar a operação.")
+    })
+    public ResponseEntity<String> mudarStatusDependente(@PathVariable Long id, @RequestBody boolean status) throws Exception{
+        try {
+            clienteService.alterarStatusDependente(id, status);
+            return ResponseEntity.ok("Status do cliente editado com sucesso");
+        } catch (ResponseStatusException erro) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Erro: " + erro.getMessage());
+        }
+    }
 
     @DeleteMapping("/deletarSocio/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
