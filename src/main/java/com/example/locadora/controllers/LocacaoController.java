@@ -27,7 +27,7 @@ public class LocacaoController {
             @ApiResponse(responseCode = "400", description = "O servidor não pode processar a requisição devido a um erro no cliente."),
             @ApiResponse(responseCode = "500", description = "Caso não tenha sido possível realizar a operação.")
     })
-    public ResponseEntity<Locacao> criarLocacao(@RequestBody LocacaoDTO locacao) {
+    public ResponseEntity<Locacao> criarLocacao(@RequestBody LocacaoDTO locacao) throws Exception {
         Locacao novaLocacao = locacaoService.efetuarLocacao(locacao);
         return ResponseEntity.status(HttpStatus.CREATED).body(novaLocacao);
     }
@@ -50,7 +50,7 @@ public class LocacaoController {
             @ApiResponse(responseCode = "404", description = "Caso a locação não seja encontrada."),
             @ApiResponse(responseCode = "500", description = "Caso não tenha sido possível realizar a operação.")
     })
-    public ResponseEntity<Locacao> editar(@PathVariable Long id, @RequestBody LocacaoDTO locacaoAtualizada) {
+    public ResponseEntity<Locacao> editar(@PathVariable Long id, @RequestBody LocacaoDTO locacaoAtualizada) throws Exception {
         Locacao locacaoEditada = locacaoService.editarEfetuarLocacao(id, locacaoAtualizada);
         return ResponseEntity.ok(locacaoEditada);
     }
@@ -84,18 +84,5 @@ public class LocacaoController {
         Locacao locacao = locacaoService.buscarPorId(id);
         return ResponseEntity.ok(locacao);
     }
-
-
-    //    @PutMapping("/pagamento/{id}")
-//    @Operation(description = "Edita uma locação existente dado o ID.", responses = {
-//            @ApiResponse(responseCode = "200", description = "Caso a locação seja editada com sucesso."),
-//            @ApiResponse(responseCode = "400", description = "O servidor não pode processar a requisição devido a um erro no cliente."),
-//            @ApiResponse(responseCode = "404", description = "Caso a locação não seja encontrada."),
-//            @ApiResponse(responseCode = "500", description = "Caso não tenha sido possível realizar a operação.")
-//    })
-//    public ResponseEntity<Locacao> pagamento(@PathVariable Long id) {
-//        Locacao locacaoEditada = locacaoService.efetuarPagamento(id);
-//        return ResponseEntity.ok(locacaoEditada);
-//    }
 
 }

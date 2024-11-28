@@ -29,7 +29,7 @@ public class LocacaoService {
     private ClienteRepository clienteRepository;
 
     @Transactional
-    public Locacao efetuarLocacao(LocacaoDTO locacao) {
+    public Locacao efetuarLocacao(LocacaoDTO locacao) throws Exception {
 
         Item item = itemRepository.findById(locacao.item().getId())
                 .orElseThrow(()-> new ResponseStatusException(HttpStatus.NOT_FOUND, "Item não encontrado!"));
@@ -39,7 +39,7 @@ public class LocacaoService {
 
         // Verifica se o cliente está em débito
         if (clientePossuiDebito(cliente)) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Cliente está em débito e não pode realizar a locação.");
+            throw new Exception("Cliente está em débito e não pode realizar a locação.");
         }
 
         // Verifica se o item já está locado
@@ -56,7 +56,7 @@ public class LocacaoService {
         LocalDate dataDevolucaoPrevista = dataLocacao.plusDays(classe.getPrazoDevolucao());
         LocalDate dataDevolucaoEfetiva;
 
-        // Permite alteração pelo funcionário (se aplicável)
+        // Permite alteração pelo funcionário
         if (locacao.valorAlterado() != null) {
             valorLocacao = locacao.valorAlterado();
         }
@@ -87,7 +87,7 @@ public class LocacaoService {
     }
 
     @Transactional
-    public Locacao editarEfetuarLocacao(Long id, LocacaoDTO locacaoAtualizada) {
+    public Locacao editarEfetuarLocacao(Long id, LocacaoDTO locacaoAtualizada) throws Exception {
 
         Optional<Locacao> locacaoExistente = locacaoRepository.findById(id);
 
@@ -100,7 +100,7 @@ public class LocacaoService {
             locacao.setCliente(locacaoAtualizada.cliente());
 
             if(locacaoAtualizada.dtDevolucaoAlterado().isBefore(LocalDate.now())){
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Data de devolução não pode ser anterior a data de locação.");
+                throw new Exception( "Data de devolução não pode ser anterior a data de locação.");
             }else{
                 locacao.setDtDevolucaoPrevista(locacaoAtualizada.dtDevolucaoAlterado());
                 locacao.setDtDevolucaoEfetiva(locacaoAtualizada.dtDevolucaoAlterado());
@@ -165,7 +165,7 @@ public class LocacaoService {
             Locacao locacaoDelete = locacao.get();
 
             if(locacaoDelete.isPago()){
-                throw new Exception("Locação já foi paga e não pode ser cancelada.");
+                throw new Exception("Locação do cliente " + locacaoDelete.getCliente().getNome() + " já foi paga e não pode ser cancelada.");
             }else {
                 locacaoRepository.delete(locacao.get());
             }
