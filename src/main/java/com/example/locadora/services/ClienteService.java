@@ -138,13 +138,14 @@ public class ClienteService {
 
             // verifica se o sócio tem dependentes
             if(!socioAux.getDependentes().isEmpty()){//se a lista de dependentes não estiver vazia
-                // deleta os dependentes chamando o método deletarDependente
+                // deleta os dependentes chamando o método deletar Dependente
                 for(Dependente dependente : socioAux.getDependentes()) {//percorre a lista de dependentes
                     deletarDependente(dependente.getId());//deleta o dependente
                 }
             }
 
             socioRepository.deleteById(id);
+            clienteRepository.deleteById(id);
         } else {
             throw new Exception("Sócio não encontrado!");
         }
@@ -177,6 +178,7 @@ public class ClienteService {
             }
 
             dependenteRepository.deleteById(id);
+            clienteRepository.deleteById(id);
         } else {
             throw new Exception("Dependente não encontrado!");
         }
@@ -187,8 +189,16 @@ public class ClienteService {
         return clienteRepository.findAll();
     }
 
+    public List<Cliente> listarClientesAtivos(){
+        return clienteRepository.findByAtivoTrue();
+    }
+
     public List<Socio> listarTodosSocios(){
         return socioRepository.findAll();
+    }
+
+    public List<Socio> listarSociosDisponiveis(){
+        return socioRepository.listarSociosComMenosDe3DependentesAtivos();
     }
 
     public List<Dependente> listarTodosDependentes(){
@@ -198,18 +208,6 @@ public class ClienteService {
     public Cliente buscarPorId(Long id) {
         return clienteRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Cliente não encontrado!"));
-    }
-
-    // Método para alterar o status do cliente
-    public void changeBoolean(Long id) {
-
-        //Todos os dependentes de um sócio inativo têm de estar inativos também. Em um dado momento, um sócio só pode ter no máximo três dependentes ativos.
-
-        Cliente cliente = clienteRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Cliente não existe"));
-
-        cliente.setAtivo(!cliente.isAtivo());
-        clienteRepository.save(cliente);
     }
 
     public void alterarStatusSocio(Long id, boolean status) {
