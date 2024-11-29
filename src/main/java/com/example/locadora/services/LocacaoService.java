@@ -113,22 +113,6 @@ public class LocacaoService {
     }
 
     @Transactional
-    public Locacao efetuarPagamento(Long id) {
-
-        Optional<Locacao> locacaoExistente = locacaoRepository.findById(id);
-
-        if (locacaoExistente.isPresent()) {
-
-            Locacao locacao = locacaoExistente.get();
-            locacao.setPago(true);
-
-            return locacaoRepository.save(locacao);
-        } else {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Locação não encontrada!");
-        }
-    }
-
-    @Transactional
     public Locacao efetuarDevolucao(int numSerieItem, Double multa){
 
         Item item = itemRepository.findByNumSerie(numSerieItem)
@@ -185,13 +169,21 @@ public class LocacaoService {
     }
 
     private boolean clientePossuiDebito(Cliente cliente) {
+
         if (cliente.getLocacoes() != null) {
-            for (Locacao locacao : cliente.getLocacoes()) {
-                if (!locacao.isPago()) { // Verifica se locacao nao foi paga
-                    return true;
+
+            for (Locacao locacao : cliente.getLocacoes()) { // Percorre todas as locações do cliente
+
+                // verifica se a data de devolucao efetiva é menor que a data atual
+                if (locacao.getDtDevolucaoEfetiva().isBefore(LocalDate.now())) {
+                    if (!locacao.isPago()) { // Verifica se locacao nao foi paga
+                        return true;
+                    }
                 }
             }
+
         }
+
         return false;
     }
 
