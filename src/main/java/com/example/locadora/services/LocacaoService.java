@@ -4,7 +4,6 @@ import com.example.locadora.domain.Classe;
 import com.example.locadora.domain.Cliente;
 import com.example.locadora.domain.Item;
 import com.example.locadora.domain.Locacao;
-import com.example.locadora.dtos.LocacaoDTO;
 import com.example.locadora.repositories.*;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,12 +28,12 @@ public class LocacaoService {
     private ClienteRepository clienteRepository;
 
     @Transactional
-    public Locacao efetuarLocacao(LocacaoDTO locacao) throws Exception {
+    public Locacao efetuarLocacao(Locacao locacao) throws Exception {
 
-        Item item = itemRepository.findById(locacao.item().getId())
+        Item item = itemRepository.findById(locacao.getItem().getId())
                 .orElseThrow(()-> new ResponseStatusException(HttpStatus.NOT_FOUND, "Item não encontrado!"));
 
-        Cliente cliente = clienteRepository.findById(locacao.cliente().getId())
+        Cliente cliente = clienteRepository.findById(locacao.getCliente().getId())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Cliente não encontrado!"));
 
         // Verifica se o cliente está em débito
@@ -44,33 +43,21 @@ public class LocacaoService {
 
         // Verifica se o item já está locado
         if (itemJaLocado(item)) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Item já locado.");
+            throw new Exception("Item já locado.");
         }
 
         // Obtém a classe do título associado ao item
         Classe classe = item.getTitulo().getClasse();
 
-        // Calcula o valor da locação e a data de devolução prevista
-        Double valorLocacao = classe.getValor();
         LocalDate dataLocacao = LocalDate.now();
         LocalDate dataDevolucaoPrevista = dataLocacao.plusDays(classe.getPrazoDevolucao());
-        LocalDate dataDevolucaoEfetiva;
+        LocalDate dataDevolucaoEfetiva = dataDevolucaoPrevista;
 
-        // Permite alteração pelo funcionário
-        if (locacao.valorAlterado() != null) {
-            valorLocacao = locacao.valorAlterado();
-        }
-
-        if (locacao.dtDevolucaoAlterado() != null) {
-
-            if(locacao.dtDevolucaoAlterado().isBefore(dataLocacao)){
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Data de devolução não pode ser anterior a data de locação.");
-            }else{
-                dataDevolucaoEfetiva = locacao.dtDevolucaoAlterado();
-            }
-
-        }else{
-            dataDevolucaoEfetiva = dataDevolucaoPrevista;
+        // verifica se a data de devolucao efetiva é menor que a data de locacao
+        if(locacao.getDtDevolucaoEfetiva().isBefore(dataLocacao)){//
+            throw new Exception("Data de devolução não pode ser anterior a data de locação.");
+        }else{// se a data de devolucao efetiva for maior que a data de locacao
+            dataDevolucaoEfetiva = locacao.getDtDevolucaoEfetiva();
         }
 
         // Cria uma nova locação
@@ -78,7 +65,9 @@ public class LocacaoService {
         novaLocacao.setDtLocacao(dataLocacao);
         novaLocacao.setDtDevolucaoPrevista(dataDevolucaoPrevista);
         novaLocacao.setDtDevolucaoEfetiva(dataDevolucaoEfetiva);
-        novaLocacao.setValorCobrado(valorLocacao);
+        novaLocacao.setValorCobrado(locacao.getValorCobrado());
+        novaLocacao.setMultaCobrada(locacao.getMultaCobrada());
+        novaLocacao.setPago(locacao.isPago());
         novaLocacao.setItem(item);
         novaLocacao.setCliente(cliente);
 
@@ -87,7 +76,7 @@ public class LocacaoService {
     }
 
     @Transactional
-    public Locacao editarEfetuarLocacao(Long id, LocacaoDTO locacaoAtualizada) throws Exception {
+    public Locacao editarEfetuarLocacao(Long id, Locacao locacaoAtualizada) throws Exception {
 
         Optional<Locacao> locacaoExistente = locacaoRepository.findById(id);
 
@@ -95,15 +84,17 @@ public class LocacaoService {
 
             Locacao locacao = locacaoExistente.get();
             locacao.setDtLocacao(LocalDate.now());
-            locacao.setValorCobrado(locacaoAtualizada.valorAlterado());
-            locacao.setItem(locacaoAtualizada.item());
-            locacao.setCliente(locacaoAtualizada.cliente());
+            locacao.setValorCobrado(locacaoAtualizada.getValorCobrado());
+            locacao.setItem(locacaoAtualizada.getItem());
+            locacao.setCliente(locacaoAtualizada.getCliente());
+            locacao.setMultaCobrada(locacaoAtualizada.getMultaCobrada());
+            locacao.setPago(locacaoAtualizada.isPago());
+            locacao.setDtDevolucaoPrevista(locacaoAtualizada.getDtDevolucaoPrevista());
 
-            if(locacaoAtualizada.dtDevolucaoAlterado().isBefore(LocalDate.now())){
+            if(locacaoAtualizada.getDtDevolucaoEfetiva().isBefore(LocalDate.now())){
                 throw new Exception( "Data de devolução não pode ser anterior a data de locação.");
             }else{
-                locacao.setDtDevolucaoPrevista(locacaoAtualizada.dtDevolucaoAlterado());
-                locacao.setDtDevolucaoEfetiva(locacaoAtualizada.dtDevolucaoAlterado());
+                locacao.setDtDevolucaoEfetiva(locacaoAtualizada.getDtDevolucaoEfetiva());
             }
 
             return locacaoRepository.save(locacao);
