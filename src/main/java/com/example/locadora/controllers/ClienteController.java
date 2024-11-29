@@ -31,10 +31,24 @@ public class ClienteController {
         return ResponseEntity.ok(clientes);
     }
 
+    @GetMapping("/listarAtivos")
+    @Operation(description = "Lista os clientes ativos.")
+    public ResponseEntity<List<Cliente>> listarAtivos() {
+        List<Cliente> clientes = clienteService.listarClientesAtivos();
+        return ResponseEntity.ok(clientes);
+    }
+
     @GetMapping("/listarSocios")
     @Operation(description = "Lista todos os socios.")
     public ResponseEntity<List<Socio>> listarSocios() {
         List<Socio> socios = clienteService.listarTodosSocios();
+        return ResponseEntity.ok(socios);
+    }
+
+    @GetMapping("/listarDisponiveis")
+    @Operation(description = "Lista os socios disponiveis.")
+    public ResponseEntity<List<Socio>> listarSociosDisponiveis() {
+        List<Socio> socios = clienteService.listarSociosDisponiveis();
         return ResponseEntity.ok(socios);
     }
 
