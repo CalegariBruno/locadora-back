@@ -31,14 +31,14 @@ public class LocacaoController {
         return ResponseEntity.status(HttpStatus.CREATED).body(novaLocacao);
     }
 
-    @PostMapping("/efetuarDevolucao")
+    @PostMapping("/efetuarDevolucao/{id}")
     @Operation(description = "Cria uma nova devolução, fornecendo os detalhes necessários.", responses = {
             @ApiResponse(responseCode = "201", description = "Caso a locação seja inserida com sucesso."),
             @ApiResponse(responseCode = "400", description = "O servidor não pode processar a requisição devido a um erro no cliente."),
             @ApiResponse(responseCode = "500", description = "Caso não tenha sido possível realizar a operação.")
     })
-    public ResponseEntity<Locacao> criarDevolucao(@RequestBody DevolucaoDTO devolucao) {
-        Locacao novaLocacao = locacaoService.efetuarDevolucao(devolucao.numSerieItem(),devolucao.multa());
+    public ResponseEntity<Locacao> criarDevolucao(@PathVariable Long id,@RequestBody DevolucaoDTO devolucao) {
+        Locacao novaLocacao = locacaoService.efetuarDevolucao(id,devolucao.numSerieItem(),devolucao.multa());
         return ResponseEntity.status(HttpStatus.CREATED).body(novaLocacao);
     }
 

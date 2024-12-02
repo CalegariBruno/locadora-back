@@ -54,10 +54,12 @@ public class LocacaoService {
         LocalDate dataDevolucaoEfetiva = dataDevolucaoPrevista;
 
         // verifica se a data de devolucao efetiva é menor que a data de locacao
-        if(locacao.getDtDevolucaoEfetiva().isBefore(dataLocacao)){//
-            throw new Exception("Data de devolução não pode ser anterior a data de locação.");
-        }else{// se a data de devolucao efetiva for maior que a data de locacao
-            dataDevolucaoEfetiva = locacao.getDtDevolucaoEfetiva();
+        if (locacao.getDtDevolucaoEfetiva() != null) {
+            if (locacao.getDtDevolucaoEfetiva().isBefore(dataLocacao)) {//
+                throw new Exception("Data de devolução não pode ser anterior a data de locação.");
+            } else {// se a data de devolucao efetiva for maior que a data de locacao
+                dataDevolucaoEfetiva = locacao.getDtDevolucaoEfetiva();
+            }
         }
 
         // Cria uma nova locação
@@ -67,7 +69,7 @@ public class LocacaoService {
         novaLocacao.setDtDevolucaoEfetiva(dataDevolucaoEfetiva);
         novaLocacao.setValorCobrado(locacao.getValorCobrado());
         novaLocacao.setMultaCobrada(locacao.getMultaCobrada());
-        novaLocacao.setPago(locacao.isPago());
+        novaLocacao.setPago(false);
         novaLocacao.setItem(item);
         novaLocacao.setCliente(cliente);
 
@@ -104,12 +106,12 @@ public class LocacaoService {
     }
 
     @Transactional
-    public Locacao efetuarDevolucao(int numSerieItem, Double multa){
+    public Locacao efetuarDevolucao(Long id, int numSerieItem, Double multa){
 
         Item item = itemRepository.findByNumSerie(numSerieItem)
                 .orElseThrow(()-> new ResponseStatusException(HttpStatus.NOT_FOUND, "Item não encontrado!"));
 
-        Locacao locacao = locacaoRepository.findByItemAndPagoFalse(item)
+        Locacao locacao = locacaoRepository.findById(id)
                 .orElseThrow(()-> new ResponseStatusException(HttpStatus.NOT_FOUND, "Locação não encontrada!"));
 
         // verificar se a locacao ja foi paga
@@ -121,7 +123,6 @@ public class LocacaoService {
         if(locacao.getDtDevolucaoEfetiva().isBefore(LocalDate.now())){
             locacao.setMultaCobrada(multa);
             locacao.setValorCobrado(locacao.getValorCobrado() + multa);
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Devolução atrasada. Pague a multa.");
         }
 
         // registrar devolução
