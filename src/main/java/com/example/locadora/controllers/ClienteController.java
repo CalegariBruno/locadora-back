@@ -117,13 +117,9 @@ public class ClienteController {
             @ApiResponse(responseCode = "400", description = "O servidor não pode processar a requisição devido a alguma coisa que foi entendida como um erro do cliente."),
             @ApiResponse(responseCode = "500", description = "Caso não tenha sido possível realizar a operação.")
     })
-    public ResponseEntity<String> mudarStatusSocio(@PathVariable Long id, @RequestBody boolean status) {
-        try {
-            clienteService.alterarStatusSocio(id, status);
-            return ResponseEntity.ok("Status do cliente editado com sucesso");
-        } catch (ResponseStatusException erro) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Erro: " + erro.getMessage());
-        }
+    public void mudarStatusSocio(@PathVariable Long id) {
+        clienteService.alterarStatusSocio(id);
+
     }
 
     // Método para alterar o status do dependente
@@ -133,13 +129,10 @@ public class ClienteController {
             @ApiResponse(responseCode = "400", description = "O servidor não pode processar a requisição devido a alguma coisa que foi entendida como um erro do cliente."),
             @ApiResponse(responseCode = "500", description = "Caso não tenha sido possível realizar a operação.")
     })
-    public ResponseEntity<String> mudarStatusDependente(@PathVariable Long id, @RequestBody boolean status) throws Exception{
-        try {
-            clienteService.alterarStatusDependente(id, status);
-            return ResponseEntity.ok("Status do cliente editado com sucesso");
-        } catch (ResponseStatusException erro) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Erro: " + erro.getMessage());
-        }
+    public void mudarStatusDependente(@PathVariable Long id) throws Exception{
+
+            clienteService.alterarStatusDependente(id);
+
     }
 
     @DeleteMapping("/deletarSocio/{id}")

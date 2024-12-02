@@ -210,17 +210,20 @@ public class ClienteService {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Cliente não encontrado!"));
     }
 
-    public void alterarStatusSocio(Long id, boolean status) {
+    public void alterarStatusSocio(Long id) {
 
         // Busca o sócio pelo ID e lança uma exceção se não encontrado
         Socio socio = socioRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Sócio não existe"));
 
-        if (status) {
+        // Define o novo status baseado no status atual
+        boolean novoStatus = !socio.isAtivo();
+
+        if (novoStatus) {
             // Ativar os três primeiros dependentes inativos
             int dependentesInativos = 0;
             for (Dependente dependente : socio.getDependentes()) {
-                if (dependentesInativos < 3) {
+                if (!dependente.isAtivo() && dependentesInativos < 3) {
                     dependente.setAtivo(true);
                     dependenteRepository.save(dependente);
                     dependentesInativos++;
@@ -234,23 +237,31 @@ public class ClienteService {
             }
         }
 
-        socio.setAtivo(status);
+        // Atualiza o status do sócio
+        socio.setAtivo(novoStatus);
         socioRepository.save(socio);
     }
 
-    public void alterarStatusDependente(Long id, boolean status) throws Exception{
 
+    public void alterarStatusDependente(Long id) throws Exception {
+
+        // Busca o dependente pelo ID e lança uma exceção se não encontrado
         Dependente dependente = dependenteRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Dependente não existe"));
 
-        // verificar se o socio do dependente está inativo
-        if(!dependente.getSocio().isAtivo()){
+        // Verificar se o sócio do dependente está inativo
+        if (!dependente.getSocio().isAtivo()) {
             throw new Exception("Sócio do dependente está inativo!");
         }
 
-        dependente.setAtivo(status);
+        // Define o novo status baseado no status atual
+        boolean novoStatus = !dependente.isAtivo();
+
+        // Atualiza o status do dependente
+        dependente.setAtivo(novoStatus);
         dependenteRepository.save(dependente);
     }
+
 
     private int gerarNumeroInscricao() {
 
