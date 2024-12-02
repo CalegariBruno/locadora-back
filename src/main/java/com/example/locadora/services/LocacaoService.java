@@ -49,6 +49,8 @@ public class LocacaoService {
         // Obtém a classe do título associado ao item
         Classe classe = item.getTitulo().getClasse();
 
+        Double valorCobrado;
+
         LocalDate dataLocacao = LocalDate.now();
         LocalDate dataDevolucaoPrevista = dataLocacao.plusDays(classe.getPrazoDevolucao());
         LocalDate dataDevolucaoEfetiva = dataDevolucaoPrevista;
@@ -62,12 +64,18 @@ public class LocacaoService {
             }
         }
 
+        if(locacao.getValorCobrado() > 0){
+            valorCobrado = locacao.getValorCobrado();
+        }else{
+            valorCobrado = classe.getValor();
+        }
+
         // Cria uma nova locação
         Locacao novaLocacao = new Locacao();
         novaLocacao.setDtLocacao(dataLocacao);
         novaLocacao.setDtDevolucaoPrevista(dataDevolucaoPrevista);
         novaLocacao.setDtDevolucaoEfetiva(dataDevolucaoEfetiva);
-        novaLocacao.setValorCobrado(locacao.getValorCobrado());
+        novaLocacao.setValorCobrado(valorCobrado);
         novaLocacao.setMultaCobrada(locacao.getMultaCobrada());
         novaLocacao.setPago(false);
         novaLocacao.setItem(item);
@@ -123,10 +131,18 @@ public class LocacaoService {
         if(locacao.getDtDevolucaoEfetiva().isBefore(LocalDate.now())){
             locacao.setMultaCobrada(multa);
             locacao.setValorCobrado(locacao.getValorCobrado() + multa);
+            locacao.setMultaCobrada(locacao.getValorCobrado() + multa);
+        }
+
+        // verificar se a multa é maior que zero
+        if(multa>0){
+            locacao.setMultaCobrada(multa);
+            locacao.setValorCobrado(locacao.getValorCobrado() + multa);
+            locacao.setMultaCobrada(locacao.getValorCobrado() + multa);
         }
 
         // registrar devolução
-        locacao.setDtDevolucaoEfetiva(LocalDate.now());
+        locacao.setDtDevolucaoEfetiva(LocalDate.now());       
         locacao.setPago(true);
 
         return locacaoRepository.save(locacao);
