@@ -63,6 +63,18 @@ public class TituloService {
         return tituloRepository.findAll();
     }
 
+    public List<Titulo> listarPorNome(String nome){
+        return tituloRepository.findByNome(nome);
+    }
+
+    public List<Titulo> listarPorCategoria(String categoria){
+        return tituloRepository.findByCategoria(categoria);
+    }
+
+    public List<Titulo> listarPorAtor(String ator){
+        return tituloRepository.findByAtores_Nome(ator);
+    }
+
     public Titulo buscarPorId(Long id) {
         return tituloRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Título não encontrado!"));

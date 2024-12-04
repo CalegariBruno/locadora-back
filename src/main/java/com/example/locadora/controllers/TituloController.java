@@ -71,4 +71,39 @@ public class TituloController {
         Titulo titulo = tituloService.buscarPorId(id);
         return ResponseEntity.ok(titulo);
     }
+
+    // Adicione o método abaixo para buscar por nome
+    @GetMapping("/buscar/nome/{nome}")
+    @Operation(description = "Busca um título pelo nome.", responses = {
+            @ApiResponse(responseCode = "200", description = "Título retornado com sucesso."),
+            @ApiResponse(responseCode = "404", description = "Caso o título não seja encontrado.")
+    })
+    public ResponseEntity<List<Titulo>> buscarPorNome(@PathVariable String nome) {
+        List<Titulo> titulos = tituloService.listarPorNome(nome);
+        return ResponseEntity.ok(titulos);
+    }
+
+    // Adicione o método abaixo para buscar por categoria
+    @GetMapping("/buscar/categoria/{categoria}")
+    @Operation(description = "Busca um título pela categoria.", responses = {
+            @ApiResponse(responseCode = "200", description = "Título retornado com sucesso."),
+            @ApiResponse(responseCode = "404", description = "Caso o título não seja encontrado.")
+    })
+    public ResponseEntity<List<Titulo>> buscarPorCategoria(@PathVariable String categoria) {
+        List<Titulo> titulos = tituloService.listarPorCategoria(categoria);
+        return ResponseEntity.ok(titulos);
+    }
+
+    // Adicione o método abaixo para buscar por ator
+    @GetMapping("/buscar/ator/{ator}")
+    @Operation(description = "Busca um título pelo ator.", responses = {
+            @ApiResponse(responseCode = "200", description = "Título retornado com sucesso."),
+            @ApiResponse(responseCode = "404", description = "Caso o título não seja encontrado.")
+    })
+    public ResponseEntity<List<Titulo>> buscarPorAtor(@PathVariable String ator) {
+        List<Titulo> titulos = tituloService.listarPorAtor(ator);
+        return ResponseEntity.ok(titulos);
+    }
+
+
 }
