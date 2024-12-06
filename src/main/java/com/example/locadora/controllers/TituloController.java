@@ -71,4 +71,5 @@ public class TituloController {
         Titulo titulo = tituloService.buscarPorId(id);
         return ResponseEntity.ok(titulo);
     }
+
 }

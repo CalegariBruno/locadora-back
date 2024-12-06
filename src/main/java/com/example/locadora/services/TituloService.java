@@ -74,4 +74,7 @@ public class TituloService {
         }
     }
 
+    public Optional<Titulo> buscarPorNome(String nome) {
+        return tituloRepository.findByNome(nome);
+    }
 }

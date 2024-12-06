@@ -4,7 +4,6 @@ import com.example.locadora.domain.Item;
 import org.springframework.data.jpa.repository.JpaRepository;
 import com.example.locadora.domain.Locacao;
 
-import java.util.List;
 import java.util.Optional;
 
 public interface LocacaoRepository extends JpaRepository<Locacao,Long> {
